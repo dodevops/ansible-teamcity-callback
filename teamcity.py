@@ -57,7 +57,7 @@ class CallbackModule(DefaultModule):
        
         self._close_task_block()
 
-        self._display.display(u"##teamcity[blockOpened name='%s [%s]' description='%s']" % (prefix, task_name, args))
+        self._display.display(u"##teamcity[blockOpened name='%s (%s)' description='%s']" % (prefix, task_name, args))
         if self._display.verbosity >= 2:
             path = task.get_path()
             if path:
@@ -76,7 +76,7 @@ class CallbackModule(DefaultModule):
         if not name:
             msg = u"PLAY"
         else:
-            msg = u"PLAY [%s]" % name
+            msg = u"PLAY (%s)" % name
 
         self._display.display(u"##teamcity[blockOpened name='%s']" % (msg))
         self._last_play_block = msg
