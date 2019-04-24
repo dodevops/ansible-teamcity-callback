@@ -43,11 +43,14 @@ class CallbackModule(DefaultModule):
 
     # Open a new task block
     def _print_task_banner(self, task):
+
+        # Fetch task arguments, if not disabled
         args = ''
         if not task.no_log and C.DISPLAY_ARGS_TO_STDOUT:
             args = u', '.join(u'%s=%s' % a for a in task.args.items())
             args = u' %s' % args
 
+        # Set the task prefix (usually TASK)
         prefix = self._task_type_cache.get(task._uuid, 'TASK')
 
         # Use cached task name
@@ -55,15 +58,21 @@ class CallbackModule(DefaultModule):
         if task_name is None:
             task_name = task.get_name().strip()
        
+        # Close previously opened task blocks (if applicable)
         self._close_task_block()
 
-        self._display.display(u"##teamcity[blockOpened name='%s (%s)' description='%s']" % (prefix, task_name, args))
+        block_name = u"%s (%s)" % (prefix, task_name)
+
+        self._display.display(u"##teamcity[blockOpened name='%s' description='%s']" % (block_name, args))
+        
+        # Display task path, if needed
         if self._display.verbosity >= 2:
             path = task.get_path()
             if path:
                 self._display.display(u"task path: %s" % path, color=C.COLOR_DEBUG)
 
-        self._last_task_block = u"%s [%s]" % (prefix, task_name)  
+        # Store the current task
+        self._last_task_block = block_name
         self._last_task_banner = task._uuid
     
     # Open a new play block
@@ -73,13 +82,16 @@ class CallbackModule(DefaultModule):
         self._close_play_block()
 
         name = play.get_name().strip()
+        
         if not name:
-            msg = u"PLAY"
+            block_name = u"PLAY"
         else:
-            msg = u"PLAY (%s)" % name
+            block_name = u"PLAY (%s)" % name
 
-        self._display.display(u"##teamcity[blockOpened name='%s']" % (msg))
-        self._last_play_block = msg
+        self._display.display(u"##teamcity[blockOpened name='%s']" % (block_name))
+
+        # Store the current play
+        self._last_play_block = block_name
         self._play = play
 
     # This is the last step, so previously opened tasks and plays should be closed
