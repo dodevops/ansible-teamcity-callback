@@ -100,3 +100,15 @@ class CallbackModule(DefaultModule):
         self._close_play_block()
 
         super(CallbackModule, self).v2_playbook_on_stats(stats) 
+
+    def v2_runner_on_failed(self, result, ignore_errors=False):
+        status = u"FAILURE"
+        if ignore_errors:
+            status = u"WARNING"
+        
+        self.display.display(u"##teamcity[message text='Error running task %s' status='%s']" % (result._task.name, status))
+
+        if not ignore_errors:
+            self.display.display(u"##teamcity[buildProblem description='Failure running task' identity='AnsibleTaskError']")
+        
+        super(CallbackModule, self).v2_runner_on_failed(result, ignore_errors)
